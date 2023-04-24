@@ -7,9 +7,6 @@ permissions:
 on:
   workflow_call:
     inputs:
-      stage:
-        type: string
-        required: true
       environment:
         type: string
         required: true
@@ -31,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
-      STAGE: ${{ inputs.stage }}
       AWS_REGION: ${{ inputs.aws-region }}
 
     steps:

@@ -22,7 +22,6 @@ jobs:
     uses: "./.github/workflows/deploy.yml"
     with:
       environment: development
-      stage: "dev"
       role-session-name: "veda-auth-github-development-deployment"
       aws-region: "us-west-2"
     secrets: inherit
@@ -34,7 +33,6 @@ jobs:
     uses: "./.github/workflows/deploy.yml"
     with:
       environment: staging
-      stage: "staging"
       role-session-name: "veda-auth-github-staging-deployment"
       aws-region: "us-west-2"
     secrets: inherit
@@ -46,7 +44,6 @@ jobs:
     uses: "./.github/workflows/deploy.yml"
     with:
       environment: production
-      stage: "production"
       role-session-name: "veda-auth-github-production-deployment"
       aws-region: "us-west-2"
     secrets: inherit
