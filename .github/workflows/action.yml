@@ -4,18 +4,18 @@ permissions:
   id-token: write
   contents: read
 
-    inputs:
-      environment:
+inputs:
+    environment:
         type: string
         required: true
-      aws-region:
+    aws-region:
         type: string
         required: true
-      role-session-name:
+    role-session-name:
         required: false
         type: string
         default: github-actions-deployment
-    secrets:
+secrets:
       DEPLOYMENT_ROLE_ARN:
         required: true
       ENV_AWS_SECRET_NAME:
@@ -23,7 +23,7 @@ permissions:
 
 runs:
     using: "composite"
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
