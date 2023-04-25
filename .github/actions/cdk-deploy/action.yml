@@ -46,7 +46,7 @@ runs:
 
     - name: Get relevant environment configuration from aws secrets
       shell: bash
-      run: ./${{dir}}/scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
+      run: ./${{ inputs.dir }}/scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
 
     - name: Deploy
       shell: bash
