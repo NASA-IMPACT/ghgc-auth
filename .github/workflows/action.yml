@@ -21,8 +21,8 @@ secrets:
       ENV_AWS_SECRET_NAME:
         required: true
 
-runs:
-    using: "composite"
+# runs:
+#     using: "composite"
 
 jobs:
   deploy:
