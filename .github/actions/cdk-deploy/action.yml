@@ -44,6 +44,10 @@ runs:
       shell: bash
       run: cd ${{ inputs.dir }}
 
+    - name: Echo directory
+      shell: bash
+      run: echo $PWD
+
     - name: Get relevant environment configuration from aws secrets
       shell: bash
       run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
