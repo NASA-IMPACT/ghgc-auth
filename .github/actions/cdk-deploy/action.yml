@@ -24,9 +24,6 @@ inputs:
 
 runs:
   using: "composite"
-  environment: ${{ inputs.environment }}
-  env:
-    AWS_REGION: ${{ inputs.aws-region }}
   steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
