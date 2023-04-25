@@ -37,6 +37,10 @@ runs:
         pip install \
           -r requirements.txt \
 
+    - name: print current working directory
+      shell: bash
+      run: echo $PWD
+
     - name: Get relevant environment configuration from aws secrets
       shell: bash
       run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
