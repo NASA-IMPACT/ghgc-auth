@@ -42,10 +42,10 @@ runs:
 
     - name: Get relevant environment configuration from aws secrets
       shell: bash
-      working-dir: ${{ inputs.dir }}
+      working-directory: ${{ inputs.dir }}
       run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
 
     - name: Deploy
       shell: bash
-      working-dir: ${{ inputs.dir }}
+      working-directory: ${{ inputs.dir }}
       run: cdk deploy --all --require-approval never
