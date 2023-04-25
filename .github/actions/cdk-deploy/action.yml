@@ -5,6 +5,9 @@ inputs:
   env_aws_secret_name:
     required: true
     type: string
+  dir:
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -43,7 +46,7 @@ runs:
 
     - name: Get relevant environment configuration from aws secrets
       shell: bash
-      run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
+      run: ./${{dir}}/scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
 
     - name: Deploy
       shell: bash
