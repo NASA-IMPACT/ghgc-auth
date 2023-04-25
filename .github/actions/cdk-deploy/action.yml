@@ -1,23 +1,7 @@
 name: Deploy
 
-permissions:
-  id-token: write
-  contents: read
 
 inputs:
-  environment:
-    type: string
-    required: true
-  aws-region:
-    type: string
-    required: true
-  role-session-name:
-    required: false
-    type: string
-    default: github-actions-deployment
-  deployment_role_arn:
-    required: true
-    type: string
   env_aws_secret_name:
     required: true
     type: string
@@ -25,13 +9,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: ${{ inputs.deployment_role_arn }}
-        role-session-name: ${{ inputs.role-session-name }}
-        aws-region: ${{ inputs.aws-region }}
-
     - name: Install node and related deps
       uses: actions/setup-node@v3
       with:
