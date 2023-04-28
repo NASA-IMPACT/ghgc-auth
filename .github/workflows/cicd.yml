@@ -66,6 +66,6 @@ jobs:
           aws-region: "us-west-2"
 
       - name: Run deployment
-        uses: ".github/actions/cdk-deploy"
+        uses: "./.github/actions/cdk-deploy"
         with:
           env_aws_secret_name: ${{ secrets.ENV_AWS_SECRET_NAME }}
