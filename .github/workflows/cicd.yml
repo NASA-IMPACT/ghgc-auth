@@ -1,4 +1,8 @@
-name: CICD
+name: CICD 🚀
+
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
@@ -15,6 +19,7 @@ on:
 
 jobs:
   gitflow-enforcer:
+    name: Enforce git flow
     runs-on: ubuntu-latest
     steps:
       - name: Check branch
@@ -45,7 +50,7 @@ jobs:
       env_name: ${{ steps.define_environment.outputs.env_name }}
 
   deploy:
-    name: Deploy to ${{ needs.define-environment.outputs.env_name }}
+    name: Deploy to ${{ needs.define-environment.outputs.env_name }} 🚀
     runs-on: ubuntu-latest
     needs: [gitflow-enforcer, define-environment]
     environment: ${{ needs.define-environment.outputs.env_name }}
