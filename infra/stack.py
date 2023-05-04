@@ -67,7 +67,6 @@ class AuthStack(Stack):
         )
 
     def _create_userpool(self) -> cognito.UserPool:
-
         return cognito.UserPool(
             self,
             "userpool",
@@ -86,7 +85,6 @@ class AuthStack(Stack):
         userpool: cognito.UserPool,
         auth_provider_client: cognito.UserPoolClient,
     ) -> cognito_id_pool.IdentityPool:
-
         userpool_provider = cognito_id_pool.UserPoolAuthenticationProvider(
             user_pool=userpool,
             user_pool_client=auth_provider_client,
@@ -140,7 +138,9 @@ class AuthStack(Stack):
 
         domain = userpool.add_domain(
             "cognito-domain",
-            cognito_domain=cognito.CognitoDomainOptions(domain_prefix=stack_name),
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix=f"{stack_name}-v1"
+            ),
         )
 
         CfnOutput(
@@ -156,7 +156,6 @@ class AuthStack(Stack):
         self,
         client: cognito.UserPoolClient,
     ) -> str:
-
         describe_cognito_user_pool_client = cr.AwsCustomResource(
             self,
             f"describe-{client.to_string()}",
@@ -225,7 +224,6 @@ class AuthStack(Stack):
         oidc_domain: str,
         oidc_thumbprint: str,
     ) -> iam.OpenIdConnectProvider:
-
         # OIDC providers are unique per account/url pair. If the provider already exists,
         # we can just reuse it. Otherwise, we need to create it.
 
@@ -297,7 +295,6 @@ class AuthStack(Stack):
         service_id: str,
         name: Optional[str] = None,
     ) -> cognito.UserPoolClient:
-
         client = self.userpool.add_client(
             service_id,
             auth_flows=cognito.AuthFlow(user_password=True, admin_user_password=True),
@@ -367,7 +364,6 @@ class AuthStack(Stack):
         description: str,
         bucket_permissions: Dict[str, BucketPermissions],
     ) -> cognito.CfnUserPoolGroup:
-
         role = iam.Role(
             self,
             f"{group_name}_role",
@@ -407,7 +403,6 @@ class AuthStack(Stack):
         description: str,
         role_arn: str,
     ) -> cognito.CfnUserPoolGroup:
-
         # Add identity pool to trust policy of authenticated users role
         self._grant_authenticated_role_principal(role_arn=role_arn)
 
