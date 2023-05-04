@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from typing import Any, Dict, Optional, Sequence
-from uuid import uuid
+import uuid
 
 from aws_cdk import CfnOutput, RemovalPolicy, SecretValue, Stack
 from aws_cdk import aws_cognito as cognito
