@@ -10,27 +10,10 @@ on:
       - main
       - dev
       - production
-  pull_request:
-    branches:
-      - main
-      - dev
-      - production
-    types: [ opened, reopened, edited, synchronize ]
 
 jobs:
-  gitflow-enforcer:
-    name: Enforce git flow
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check branch
-        if: github.base_ref == 'main' && github.head_ref != 'dev' || github.base_ref == 'production' && github.head_ref != 'main'
-        run: |
-          echo "ERROR: You can only merge to main from dev and to production from main"
-          exit 1
-
   define-environment:
     name: Set ✨ environment ✨ based on the branch 🌳
-    needs: gitflow-enforcer
     runs-on: ubuntu-latest
     steps:
       - name: Set the environment
@@ -53,7 +36,7 @@ jobs:
     name: Deploy to ${{ needs.define-environment.outputs.env_name }} 🚀
     runs-on: ubuntu-latest
     if: ${{ needs.define-environment.outputs.env_name }}
-    needs: [gitflow-enforcer, define-environment]
+    needs: [define-environment]
     environment: ${{ needs.define-environment.outputs.env_name }}
     concurrency: ${{ needs.define-environment.outputs.env_name }}
 
