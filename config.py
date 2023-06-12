@@ -43,3 +43,10 @@ class Config(pydantic.BaseSettings):
         None,
         description="Thumbprint of OIDC provider to use for CI workers.",
     )
+
+    permissions_boundary_policy_name: Optional[str] = pydantic.Field(
+        None,
+        description="Name of IAM policy to define stack permissions boundary",
+    )
+    
+auth_app_settings = Config()
