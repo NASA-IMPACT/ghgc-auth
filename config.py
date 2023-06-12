@@ -1,3 +1,5 @@
+import os
+
 from getpass import getuser
 from typing import Optional
 
@@ -48,5 +50,5 @@ class Config(pydantic.BaseSettings):
         None,
         description="Name of IAM policy to define stack permissions boundary",
     )
-    
-auth_app_settings = Config()
+
+auth_app_settings = Config(_env_file=os.environ.get("ENV_FILE", ".env"))

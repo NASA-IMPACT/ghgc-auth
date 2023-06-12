@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import os
 import subprocess
 
 import aws_cdk as cdk
 
 from infra.stack import AuthStack, BucketPermissions
-from config import Config
+from config import auth_app_settings
 
-config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
 try:
     git_tag = subprocess.check_output(["git", "describe", "--tags"]).decode().strip()
@@ -16,18 +14,18 @@ except subprocess.CalledProcessError:
 
 tags = {
     "Project": "ghgc",
-    "Owner": config.owner,
+    "Owner": auth_app_settings.owner,
     "Client": "nasa-impact",
-    "Stack": config.stage,
+    "Stack": auth_app_settings.stage,
     "GitCommit": git_sha,
     "GitTag": git_tag,
 }
 
 app = cdk.App()
-stack = AuthStack(app, f"{config.app_name}-stack-{config.stage}")
+stack = AuthStack(app, f"{auth_app_settings.app_name}-stack-{auth_app_settings.stage}", auth_app_settings)
 
 # Create a data managers group in user pool if data managers role is provided
-if data_managers_role_arn := config.data_managers_role_arn:
+if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
     stack.add_cognito_group_with_existing_role(
         "ghgc-data-store-managers",
         "Authenticated users assume read write GHGC data access role",
@@ -95,11 +93,11 @@ stack.add_service_client(
 
 # Generate an OIDC provider, allowing CI workers to assume roles in the account
 
-oidc_thumbprint = config.oidc_thumbprint
-oidc_provider_url = config.oidc_provider_url
+oidc_thumbprint = auth_app_settings.oidc_thumbprint
+oidc_provider_url = auth_app_settings.oidc_provider_url
 if oidc_thumbprint and oidc_provider_url:
     stack.add_oidc_provider(
-        f"ghgc-oidc-provider-{config.stage}",
+        f"ghgc-oidc-provider-{auth_app_settings.stage}",
         oidc_provider_url,
         oidc_thumbprint,
     )

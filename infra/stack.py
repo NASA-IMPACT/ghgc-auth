@@ -11,7 +11,8 @@ from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import custom_resources as cr
 from constructs import Construct
 from aws_cdk import Aspects
-from config import auth_app_settings
+
+from config import Config
 
 class BucketPermissions(str, Enum):
     read_only = "r"
@@ -19,7 +20,7 @@ class BucketPermissions(str, Enum):
 
 
 class AuthStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, auth_app_settings: Config, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         if auth_app_settings.permissions_boundary_policy_name:
@@ -30,7 +31,7 @@ class AuthStack(Stack):
             )
             iam.PermissionsBoundary.of(self).apply(permission_boundary_policy)
 
-            from permission_boundary import PermissionBoundaryAspect
+            from infra.permission_boundary import PermissionBoundaryAspect
 
             Aspects.of(self).add(PermissionBoundaryAspect(permission_boundary_policy))
 
