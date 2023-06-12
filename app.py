@@ -27,7 +27,6 @@ tags = {
 }
 
 app = cdk.App()
-stack = AuthStack(app, f"{config.app_name}-stack-{config.stage}")
 
 # Set permissions boundary on CDK stack
 class AuthStack(Stack):
@@ -47,6 +46,8 @@ class AuthStack(Stack):
             from permission_boundary import PermissionBoundaryAspect
 
             Aspects.of(self).add(PermissionBoundaryAspect(permission_boundary_policy))
+            
+stack = AuthStack(app, f"{config.app_name}-stack-{config.stage}")
 
 # Create a data managers group in user pool if data managers role is provided
 if data_managers_role_arn := config.data_managers_role_arn:
