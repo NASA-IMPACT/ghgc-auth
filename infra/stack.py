@@ -11,7 +11,6 @@ from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import custom_resources as cr
 from constructs import Construct
 from aws_cdk import Aspects
-from config import Config
 from config import auth_app_settings
 
 class BucketPermissions(str, Enum):
