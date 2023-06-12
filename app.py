@@ -5,6 +5,7 @@ import subprocess
 import aws_cdk as cdk
 
 from infra.stack import AuthStack, BucketPermissions
+from config import Config
 
 config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
