@@ -4,11 +4,7 @@ import subprocess
 
 import aws_cdk as cdk
 
-from aws_cdk import Aspects, Stack, aws_iam
-from constructs import Construct
-from config import Config
 from infra.stack import AuthStack, BucketPermissions
-from config import auth_app_settings
 
 config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
@@ -28,28 +24,6 @@ tags = {
 
 app = cdk.App()
 stack = AuthStack(app, f"{config.app_name}-stack-{config.stage}")
-
-# Set permissions boundary on CDK stack
-class AuthStack(Stack):
-    
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
-        """."""
-        super().__init__(scope, construct_id, **kwargs)
-
-        if auth_app_settings.permissions_boundary_policy_name:
-            permission_boundary_policy = aws_iam.ManagedPolicy.from_managed_policy_name(
-                self,
-                "permission-boundary",
-                auth_app_settings.permissions_boundary_policy_name,
-            )
-            aws_iam.PermissionsBoundary.of(self).apply(permission_boundary_policy)
-
-            from permission_boundary import PermissionBoundaryAspect
-
-            Aspects.of(self).add(PermissionBoundaryAspect(permission_boundary_policy))
-
-            # Print the permissions_boundary_policy
-            print(f"permissions_boundary_policy: {permission_boundary_policy}")
 
 # Create a data managers group in user pool if data managers role is provided
 if data_managers_role_arn := config.data_managers_role_arn:
