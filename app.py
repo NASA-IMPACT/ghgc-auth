@@ -48,6 +48,9 @@ class AuthStack(Stack):
 
             Aspects.of(self).add(PermissionBoundaryAspect(permission_boundary_policy))
 
+            # Print the permissions_boundary_policy
+            print(f"permissions_boundary_policy: {permission_boundary_policy}")
+
 # Create a data managers group in user pool if data managers role is provided
 if data_managers_role_arn := config.data_managers_role_arn:
     stack.add_cognito_group_with_existing_role(
