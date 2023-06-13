@@ -22,7 +22,11 @@ tags = {
 }
 
 app = cdk.App()
-stack = AuthStack(app, f"{auth_app_settings.app_name}-stack-{auth_app_settings.stage}", auth_app_settings)
+stack = AuthStack(
+    app,
+    f"{auth_app_settings.app_name}-stack-{auth_app_settings.stage}",
+    auth_app_settings,
+)
 
 # Create a data managers group in user pool if data managers role is provided
 if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
@@ -33,41 +37,42 @@ if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
     )
 
 # Create Groups
-stack.add_cognito_group(
-    "ghgc-staging-writers",
-    "Users that have read/write-access to the GHGC store and staging datastore",
-    {
-        "ghgc-data-store-dev": BucketPermissions.read_write,
-        "ghgc-data-store": BucketPermissions.read_write,
-        "ghgc-data-store-staging": BucketPermissions.read_write,
-    },
-)
-stack.add_cognito_group(
-    "ghgc-writers",
-    "Users that have read/write-access to the GHGC store",
-    {
-        "ghgc-data-store-dev": BucketPermissions.read_write,
-        "ghgc-data-store": BucketPermissions.read_write,
-    },
-)
+if auth_app_settings.cognito_groups:
+    stack.add_cognito_group(
+        "ghgc-staging-writers",
+        "Users that have read/write-access to the GHGC store and staging datastore",
+        {
+            "ghgc-data-store-dev": BucketPermissions.read_write,
+            "ghgc-data-store": BucketPermissions.read_write,
+            "ghgc-data-store-staging": BucketPermissions.read_write,
+        },
+    )
+    stack.add_cognito_group(
+        "ghgc-writers",
+        "Users that have read/write-access to the GHGC store",
+        {
+            "ghgc-data-store-dev": BucketPermissions.read_write,
+            "ghgc-data-store": BucketPermissions.read_write,
+        },
+    )
 
-stack.add_cognito_group(
-    "ghgc-staging-readers",
-    "Users that have read-access to the GHGC store and staging data store",
-    {
-        "ghgc-data-store-dev": BucketPermissions.read_only,
-        "ghgc-data-store": BucketPermissions.read_only,
-        "ghgc-data-store-staging": BucketPermissions.read_only,
-    },
-)
-# TODO: Should this be the default IAM role for the user group?
-stack.add_cognito_group(
-    "ghgc-readers",
-    "Users that have read-access to the GHGC store",
-    {
-        "ghgc-data-store": BucketPermissions.read_only,
-    },
-)
+    stack.add_cognito_group(
+        "ghgc-staging-readers",
+        "Users that have read-access to the GHGC store and staging data store",
+        {
+            "ghgc-data-store-dev": BucketPermissions.read_only,
+            "ghgc-data-store": BucketPermissions.read_only,
+            "ghgc-data-store-staging": BucketPermissions.read_only,
+        },
+    )
+    # TODO: Should this be the default IAM role for the user group?
+    stack.add_cognito_group(
+        "ghgc-readers",
+        "Users that have read-access to the GHGC store",
+        {
+            "ghgc-data-store": BucketPermissions.read_only,
+        },
+    )
 
 # Generate a resource server (ie something to protect behind auth) with scopes
 # (permissions that we can grant to users/services).

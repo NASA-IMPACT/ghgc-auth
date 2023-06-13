@@ -14,13 +14,16 @@ from aws_cdk import Aspects
 
 from config import Config
 
+
 class BucketPermissions(str, Enum):
     read_only = "r"
     read_write = "wr"
 
 
 class AuthStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, auth_app_settings: Config, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, construct_id: str, auth_app_settings: Config, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         if auth_app_settings.permissions_boundary_policy_name:
@@ -37,14 +40,6 @@ class AuthStack(Stack):
 
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
-        auth_provider_client = self.add_programmatic_client(
-            "cognito-identity-pool-auth-provider",
-            name="Identity Pool Authentication Provider",
-        )
-        self.identitypool = self._create_identity_pool(
-            userpool=self.userpool,
-            auth_provider_client=auth_provider_client,
-        )
 
         self._group_precedence = 0
 
@@ -55,30 +50,40 @@ class AuthStack(Stack):
             export_name=f"{stack_name}-userpool-id",
             value=self.userpool.user_pool_id,
         )
-        CfnOutput(
-            self,
-            "identitypool_id",
-            export_name=f"{stack_name}-identitypool-id",
-            value=self.identitypool.identity_pool_id,
-        )
-        CfnOutput(
-            self,
-            "identitypool_arn",
-            export_name=f"{stack_name}-identitypool-arn",
-            value=self.identitypool.identity_pool_arn,
-        )
-        CfnOutput(
-            self,
-            "identitypool_client_id",
-            export_name=f"{stack_name}-client-id",
-            value=auth_provider_client.user_pool_client_id,
-        )
-        CfnOutput(
-            self,
-            "identitypool_data_managers_role_arn",
-            export_name=f"{stack_name}-data-managers-role-arn",
-            value=self.identitypool.authenticated_role.role_arn,
-        )
+
+        if auth_app_settings.cognito_groups:
+            auth_provider_client = self.add_programmatic_client(
+                "cognito-identity-pool-auth-provider",
+                name="Identity Pool Authentication Provider",
+            )
+            self.identitypool = self._create_identity_pool(
+                userpool=self.userpool,
+                auth_provider_client=auth_provider_client,
+            )
+            CfnOutput(
+                self,
+                "identitypool_id",
+                export_name=f"{stack_name}-identitypool-id",
+                value=self.identitypool.identity_pool_id,
+            )
+            CfnOutput(
+                self,
+                "identitypool_arn",
+                export_name=f"{stack_name}-identitypool-arn",
+                value=self.identitypool.identity_pool_arn,
+            )
+            CfnOutput(
+                self,
+                "identitypool_client_id",
+                export_name=f"{stack_name}-client-id",
+                value=auth_provider_client.user_pool_client_id,
+            )
+            CfnOutput(
+                self,
+                "identitypool_data_managers_role_arn",
+                export_name=f"{stack_name}-data-managers-role-arn",
+                value=self.identitypool.authenticated_role.role_arn,
+            )
 
     def _create_userpool(self) -> cognito.UserPool:
         return cognito.UserPool(
