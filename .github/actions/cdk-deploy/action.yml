@@ -13,6 +13,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout correct branch
+      shell: bash
+      run: |
+        git checkout dev
+        git pull origin dev
+        ls -al
+
     - name: Install node and related deps
       uses: actions/setup-node@v3
       with:
@@ -44,10 +51,14 @@ runs:
 
     - name: Get relevant environment configuration from aws secrets
       shell: bash
-      working-directory: ${{ inputs.dir }}
-      run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
+      env:
+        SECRET_SSM_NAME: ${{ inputs.env_aws_secret_name }}
+        AWS_DEFAULT_REGION: us-west-2
+      run: |
+        aws secretsmanager get-secret-value --secret-id $SECRET_SSM_NAME --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
 
     - name: Deploy
       shell: bash
       working-directory: ${{ inputs.dir }}
-      run: cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
+      run: |
+        ls -al
