@@ -14,7 +14,6 @@ try:
 except subprocess.CalledProcessError:
     git_tag = "no-tag"
 proj_prefix = environ.get("PROJ_PREFIX", "ghgc")
-qualifier = environ.get("CDK_QUALIFIER", "hnb659fd")
 tags = {
     "Project": proj_prefix,
     "Owner": config.owner,
@@ -26,7 +25,7 @@ tags = {
 
 app = cdk.App()
 stack = AuthStack(app, f"{config.app_name}-stack-{config.stage}", synthesizer=cdk.DefaultStackSynthesizer(
-        qualifier=qualifier
+        qualifier=config.cdk_qualifier
 ))
 
 # Create a data managers group in user pool if data managers role is provided

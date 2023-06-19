@@ -43,3 +43,7 @@ class Config(pydantic.BaseSettings):
         None,
         description="Thumbprint of OIDC provider to use for CI workers.",
     )
+    cdk_qualifier: Optional[str] = pydantic.Field(
+        "hnb659fds",
+        description="CDK qualifier for deployment.",
+    )
