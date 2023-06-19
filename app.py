@@ -14,7 +14,7 @@ try:
 except subprocess.CalledProcessError:
     git_tag = "no-tag"
 proj_prefix = environ.get("PROJ_PREFIX", "ghgc")
-qualifier = environ.get("CDK_QUALIFIER", "hnb659fds")
+qualifier = environ.get("CDK_QUALIFIER", "hnb659fd")
 tags = {
     "Project": proj_prefix,
     "Owner": config.owner,
