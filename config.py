@@ -6,7 +6,7 @@ import pydantic
 
 class Config(pydantic.BaseSettings):
     app_name: str = pydantic.Field(
-        "ghgc-auth",
+        "veda-auth",
         description="Name of the associated App.",
     )
     stage: str = pydantic.Field(
