@@ -2,6 +2,7 @@
 import subprocess
 
 import aws_cdk as cdk
+from os import environ
 
 from infra.stack import AuthStack, BucketPermissions
 from config import auth_app_settings
@@ -11,9 +12,10 @@ try:
     git_tag = subprocess.check_output(["git", "describe", "--tags"]).decode().strip()
 except subprocess.CalledProcessError:
     git_tag = "no-tag"
-
+proj_prefix = environ.get("PROJ_PREFIX", "veda")
 tags = {
-    "Project": "ghgc",
+
+    "Project": proj_prefix,
     "Owner": auth_app_settings.owner,
     "Client": "nasa-impact",
     "Stack": auth_app_settings.stage,
@@ -22,21 +24,27 @@ tags = {
 }
 
 app = cdk.App()
+
 stack = AuthStack(
     app,
     f"{auth_app_settings.app_name}-stack-{auth_app_settings.stage}",
     auth_app_settings,
-)
+    synthesizer=cdk.DefaultStackSynthesizer(
+        qualifier=auth_app_settings.cdk_qualifier
+))
+
 
 # Create a data managers group in user pool if data managers role is provided
 if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
     stack.add_cognito_group_with_existing_role(
-        "ghgc-data-store-managers",
+
+        f"{proj_prefix}-data-store-managers",
         "Authenticated users assume read write GHGC data access role",
         role_arn=data_managers_role_arn,
     )
 
 # Create Groups
+
 if auth_app_settings.cognito_groups:
     stack.add_cognito_group(
         "ghgc-staging-writers",
@@ -56,6 +64,7 @@ if auth_app_settings.cognito_groups:
         },
     )
 
+
     stack.add_cognito_group(
         "ghgc-staging-readers",
         "Users that have read-access to the GHGC store and staging data store",
@@ -74,10 +83,12 @@ if auth_app_settings.cognito_groups:
         },
     )
 
+
 # Generate a resource server (ie something to protect behind auth) with scopes
 # (permissions that we can grant to users/services).
 stac_registry_scopes = stack.add_resource_server(
-    "ghgc-stac-ingestion-registry",
+
+    f"{proj_prefix}-stac-ingestion-registry",
     supported_scopes={
         "stac:register": "Create STAC ingestions",
         "stac:cancel": "Cancel a STAC ingestion",
@@ -90,7 +101,8 @@ stac_registry_scopes = stack.add_resource_server(
 # In this case, we want this client to be able to only register new STAC ingestions in
 # the STAC ingestion registry service.
 stack.add_service_client(
-    "ghgc-workflows",
+
+    f"{proj_prefix}-workflows",
     scopes=[
         stac_registry_scopes["stac:register"],
     ],
@@ -102,13 +114,16 @@ oidc_thumbprint = auth_app_settings.oidc_thumbprint
 oidc_provider_url = auth_app_settings.oidc_provider_url
 if oidc_thumbprint and oidc_provider_url:
     stack.add_oidc_provider(
-        f"ghgc-oidc-provider-{auth_app_settings.stage}",
+
+
+        f"{proj_prefix}-oidc-provider-{auth_app_settings.stage}",
         oidc_provider_url,
         oidc_thumbprint,
     )
 
 # Programmatic Clients
-stack.add_programmatic_client("ghgc-sdk")
+
+stack.add_programmatic_client(f"{proj_prefix}-sdk")
 
 # Frontend Clients
 # stack.add_frontend_client('ghgc-dashboard')

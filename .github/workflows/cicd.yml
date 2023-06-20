@@ -24,6 +24,8 @@ jobs:
             echo "env_name=staging" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
             echo "env_name=development" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/production" ]; then
+            echo "env_name=production" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/ghc-deploy-dev-mcp" ]; then
             echo "env_name=mcp-dev" >> $GITHUB_OUTPUT
           fi
