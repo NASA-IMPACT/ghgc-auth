@@ -8,7 +8,7 @@ import pydantic
 
 class Config(pydantic.BaseSettings):
     app_name: str = pydantic.Field(
-        "ghgc-auth",
+        "veda-auth",
         description="Name of the associated App.",
     )
     stage: str = pydantic.Field(
@@ -56,6 +56,11 @@ class Config(pydantic.BaseSettings):
         True,
         description="Where to create cognito groups with bucket access permissions",
     )
+    cdk_qualifier: Optional[str] = pydantic.Field(
+        "hnb659fds",
+        description="CDK qualifier for deployment.",
+    )
 
 
 auth_app_settings = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
+
