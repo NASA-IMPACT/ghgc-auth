@@ -35,6 +35,10 @@ class Config(pydantic.BaseSettings):
         None,
         description="ARN of role to be assumed by authenticated users in data managers group.",
     )
+    project_prefix: Optional[str] = pydantic.Field(
+        None,
+        description="URL of OIDC provider to use for CI workers.",
+    )
 
     oidc_provider_url: Optional[str] = pydantic.Field(
         None,

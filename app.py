@@ -2,7 +2,6 @@
 import subprocess
 
 import aws_cdk as cdk
-from os import environ
 
 from infra.stack import AuthStack, BucketPermissions
 from config import auth_app_settings
@@ -12,7 +11,7 @@ try:
     git_tag = subprocess.check_output(["git", "describe", "--tags"]).decode().strip()
 except subprocess.CalledProcessError:
     git_tag = "no-tag"
-proj_prefix = environ.get("PROJ_PREFIX", "veda")
+proj_prefix = auth_app_settings.project_prefix
 tags = {
 
     "Project": proj_prefix,
@@ -47,39 +46,39 @@ if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
 
 if auth_app_settings.cognito_groups:
     stack.add_cognito_group(
-        "ghgc-staging-writers",
+        f"{proj_prefix}-staging-writers",
         "Users that have read/write-access to the GHGC store and staging datastore",
         {
-            "ghgc-data-store-dev": BucketPermissions.read_write,
-            "ghgc-data-store": BucketPermissions.read_write,
-            "ghgc-data-store-staging": BucketPermissions.read_write,
+            f"{proj_prefix}-data-store-dev": BucketPermissions.read_write,
+            f"{proj_prefix}-data-store": BucketPermissions.read_write,
+            f"{proj_prefix}-data-store-staging": BucketPermissions.read_write,
         },
     )
     stack.add_cognito_group(
-        "ghgc-writers",
+        f"{proj_prefix}-writers",
         "Users that have read/write-access to the GHGC store",
         {
-            "ghgc-data-store-dev": BucketPermissions.read_write,
-            "ghgc-data-store": BucketPermissions.read_write,
+            f"{proj_prefix}-data-store-dev": BucketPermissions.read_write,
+            f"{proj_prefix}-data-store": BucketPermissions.read_write,
         },
     )
 
 
     stack.add_cognito_group(
-        "ghgc-staging-readers",
+        f"{proj_prefix}-staging-readers",
         "Users that have read-access to the GHGC store and staging data store",
         {
-            "ghgc-data-store-dev": BucketPermissions.read_only,
-            "ghgc-data-store": BucketPermissions.read_only,
-            "ghgc-data-store-staging": BucketPermissions.read_only,
+            f"{proj_prefix}-data-store-dev": BucketPermissions.read_only,
+            f"{proj_prefix}-data-store": BucketPermissions.read_only,
+            f"{proj_prefix}-data-store-staging": BucketPermissions.read_only,
         },
     )
     # TODO: Should this be the default IAM role for the user group?
     stack.add_cognito_group(
-        "ghgc-readers",
+        f"{proj_prefix}-readers",
         "Users that have read-access to the GHGC store",
         {
-            "ghgc-data-store": BucketPermissions.read_only,
+            f"{proj_prefix}-data-store": BucketPermissions.read_only,
         },
     )
 
