@@ -12,6 +12,7 @@ try:
 except subprocess.CalledProcessError:
     git_tag = "no-tag"
 proj_prefix = auth_app_settings.project_prefix
+app_name = f"{proj_prefix}-{auth_app_settings.app_name}"
 tags = {
 
     "Project": proj_prefix,
@@ -26,7 +27,7 @@ app = cdk.App()
 
 stack = AuthStack(
     app,
-    f"{auth_app_settings.app_name}-stack-{auth_app_settings.stage}",
+    f"{app_name}-stack-{auth_app_settings.stage}",
     auth_app_settings,
     synthesizer=cdk.DefaultStackSynthesizer(
         qualifier=auth_app_settings.cdk_qualifier
@@ -38,7 +39,7 @@ if data_managers_role_arn := auth_app_settings.data_managers_role_arn:
     stack.add_cognito_group_with_existing_role(
 
         f"{proj_prefix}-data-store-managers",
-        "Authenticated users assume read write GHGC data access role",
+        f"Authenticated users assume read write {proj_prefix.upper()} data access role",
         role_arn=data_managers_role_arn,
     )
 

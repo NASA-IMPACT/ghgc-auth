@@ -1,14 +1,12 @@
-import os
-
 from getpass import getuser
 from typing import Optional
 
 import pydantic
 
 
-class Config(pydantic.BaseSettings):
+class AuthConfig(pydantic.BaseSettings):
     app_name: str = pydantic.Field(
-        "veda-auth",
+        "auth",
         description="Name of the associated App.",
     )
     stage: str = pydantic.Field(
@@ -37,7 +35,7 @@ class Config(pydantic.BaseSettings):
     )
     project_prefix: Optional[str] = pydantic.Field(
         None,
-        description="URL of OIDC provider to use for CI workers.",
+        description="Project prefix (ghgc/veda/...)",
     )
 
     oidc_provider_url: Optional[str] = pydantic.Field(
@@ -65,7 +63,10 @@ class Config(pydantic.BaseSettings):
         description="CDK qualifier for deployment.",
     )
 
+    class Config:
+        """model config."""
 
-auth_app_settings = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
+        env_file = ".env"
 
 
+auth_app_settings = AuthConfig()
