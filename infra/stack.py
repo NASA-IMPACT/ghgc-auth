@@ -40,7 +40,6 @@ class AuthStack(Stack):
 
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
-        self.auth_app_settings = auth_app_settings()
 
         self._group_precedence = 0
 
@@ -159,14 +158,14 @@ class AuthStack(Stack):
         domain = userpool.add_domain(
             "cognito-domain",
             cognito_domain=cognito.CognitoDomainOptions(
-                domain_prefix=f"{self.auth_app_settings.project_prefix}-{stack_name}"
+                domain_prefix=f"{AuthConfig().project_prefix}-{stack_name}"
             ),
         )
 
         CfnOutput(
             self,
             "domain-base-url",
-            export_name=f"{self.auth_app_settings.project_prefix}-{stack_name}-userpool-domain-base-url",
+            export_name=f"{stack_name}-userpool-domain-base-url",
             value=domain.base_url(),
         )
 
