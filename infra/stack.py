@@ -12,7 +12,7 @@ from aws_cdk import custom_resources as cr
 from constructs import Construct
 from aws_cdk import Aspects
 
-from config import Config
+from config import AuthConfig
 
 
 class BucketPermissions(str, Enum):
@@ -22,7 +22,7 @@ class BucketPermissions(str, Enum):
 
 class AuthStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, auth_app_settings: Config, **kwargs
+        self, scope: Construct, construct_id: str, auth_app_settings: AuthConfig, **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
