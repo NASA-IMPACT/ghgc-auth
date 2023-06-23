@@ -9,6 +9,9 @@ inputs:
     required: false
     type: string
     default: "."
+  script_path:
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -49,7 +52,7 @@ runs:
         SECRET_SSM_NAME: ${{ inputs.env_aws_secret_name }}
         AWS_DEFAULT_REGION: us-west-2
       run: |
-        aws secretsmanager get-secret-value --secret-id $SECRET_SSM_NAME --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+        python ${{ inputs.script_path }} --secret-id ${{ inputs.env_aws_secret_name }}
 
     - name: Deploy
       shell: bash
