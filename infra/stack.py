@@ -47,7 +47,7 @@ class AuthStack(Stack):
         CfnOutput(
             self,
             "userpool_id",
-            export_name=f"{stack_name}-userpool-id",
+            export_name="userpool-id",
             value=self.userpool.user_pool_id,
         )
 
@@ -75,7 +75,7 @@ class AuthStack(Stack):
             CfnOutput(
                 self,
                 "identitypool_client_id",
-                export_name=f"{stack_name}-client-id",
+                export_name="client-id",
                 value=auth_provider_client.user_pool_client_id,
             )
             CfnOutput(
