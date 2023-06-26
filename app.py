@@ -27,7 +27,7 @@ app = cdk.App()
 
 stack = AuthStack(
     app,
-    f"{app_name}-stack-{auth_app_settings.stage}",
+    f"{app_name}-{auth_app_settings.stage}",
     auth_app_settings,
     synthesizer=cdk.DefaultStackSynthesizer(
         qualifier=auth_app_settings.cdk_qualifier
