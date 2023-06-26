@@ -24,10 +24,10 @@ tags = {
 }
 
 app = cdk.App()
-
+stack_name = f"{app_name}-{auth_app_settings.stage}"
 stack = AuthStack(
     app,
-    f"{app_name}-{auth_app_settings.stage}",
+    stack_name,
     auth_app_settings,
     synthesizer=cdk.DefaultStackSynthesizer(
         qualifier=auth_app_settings.cdk_qualifier
@@ -128,7 +128,7 @@ client = stack.add_programmatic_client(f"{proj_prefix}-sdk")
 cdk.CfnOutput(
     stack,
     "client_id",
-    export_name="client-id",
+    export_name=f"{stack_name}-client-id",
     value=client.user_pool_client_id,
 )
 
