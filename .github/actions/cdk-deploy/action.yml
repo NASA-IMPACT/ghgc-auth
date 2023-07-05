@@ -53,10 +53,13 @@ runs:
         AWS_DEFAULT_REGION: us-west-2
       run: |
         python ${{ inputs.script_path }} --secret-id ${{ inputs.env_aws_secret_name }}
+        echo "PROJECT_PREFIX=${{ vars.PROJECT_PREFIX }}" >> .env
+        echo "STAGE=${{ vars.STAGE }}" >> .env
 
     - name: Deploy
       shell: bash
       working-directory: ${{ inputs.dir }}
       run: |
+        cat .env
         cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
 
