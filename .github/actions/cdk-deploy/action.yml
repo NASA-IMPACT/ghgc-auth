@@ -9,6 +9,18 @@ inputs:
     required: false
     type: string
     default: "."
+  script_path:
+    required: true
+    type: string
+  project_prefix:
+    required: true
+    type: string
+  stage:
+    required: true
+    type: string
+
+
+
 
 runs:
   using: "composite"
@@ -45,9 +57,16 @@ runs:
     - name: Get relevant environment configuration from aws secrets
       shell: bash
       working-directory: ${{ inputs.dir }}
-      run: ./scripts/sync-env.sh ${{ inputs.env_aws_secret_name }}
+      env:
+        AWS_DEFAULT_REGION: us-west-2
+      run: |
+        python ${{ inputs.script_path }} --secret-id ${{ inputs.env_aws_secret_name }}
+        echo "PROJECT_PREFIX=${{ inputs.project_prefix }}" >> .env
+        echo "STAGE=${{ inputs.stage }}" >> .env
 
     - name: Deploy
       shell: bash
       working-directory: ${{ inputs.dir }}
-      run: cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
+      run: |
+        cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
+

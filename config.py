@@ -4,9 +4,9 @@ from typing import Optional
 import pydantic
 
 
-class Config(pydantic.BaseSettings):
+class AuthConfig(pydantic.BaseSettings):
     app_name: str = pydantic.Field(
-        "ghgc-auth",
+        "auth",
         description="Name of the associated App.",
     )
     stage: str = pydantic.Field(
@@ -33,6 +33,10 @@ class Config(pydantic.BaseSettings):
         None,
         description="ARN of role to be assumed by authenticated users in data managers group.",
     )
+    project_prefix: Optional[str] = pydantic.Field(
+        None,
+        description="Project prefix (ghgc/veda/...)",
+    )
 
     oidc_provider_url: Optional[str] = pydantic.Field(
         None,
@@ -43,3 +47,26 @@ class Config(pydantic.BaseSettings):
         None,
         description="Thumbprint of OIDC provider to use for CI workers.",
     )
+
+    permissions_boundary_policy_name: Optional[str] = pydantic.Field(
+        None,
+        description="Name of IAM policy to define stack permissions boundary",
+    )
+
+    # Since MCP doesn't allow creating identity pools, setting this as optional
+    cognito_groups: Optional[bool] = pydantic.Field(
+        True,
+        description="Where to create cognito groups with bucket access permissions",
+    )
+    cdk_qualifier: Optional[str] = pydantic.Field(
+        "hnb659fds",
+        description="CDK qualifier for deployment.",
+    )
+
+    class Config:
+        """model config."""
+
+        env_file = ".env"
+
+
+auth_app_settings = AuthConfig()
