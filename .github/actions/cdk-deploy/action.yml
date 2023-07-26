@@ -68,5 +68,6 @@ runs:
       shell: bash
       working-directory: ${{ inputs.dir }}
       run: |
-        cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
+        ls -al
+        # cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
 
