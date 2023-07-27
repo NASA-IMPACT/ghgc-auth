@@ -1,6 +1,5 @@
 name: Deploy
 
-
 inputs:
   env_aws_secret_name:
     required: true
@@ -18,9 +17,6 @@ inputs:
   stage:
     required: true
     type: string
-
-
-
 
 runs:
   using: "composite"
@@ -69,4 +65,3 @@ runs:
       working-directory: ${{ inputs.dir }}
       run: |
         cdk deploy --all --require-approval never --outputs-file ${HOME}/cdk-outputs.json
-
