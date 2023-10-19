@@ -10,6 +10,9 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import custom_resources as cr
 from constructs import Construct
+from aws_cdk import Aspects
+
+from config import AuthConfig
 
 
 class BucketPermissions(str, Enum):
@@ -18,19 +21,25 @@ class BucketPermissions(str, Enum):
 
 
 class AuthStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+            self, scope: Construct, construct_id: str, auth_app_settings: AuthConfig, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        if auth_app_settings.permissions_boundary_policy_name:
+            permission_boundary_policy = iam.ManagedPolicy.from_managed_policy_name(
+                self,
+                "permission-boundary",
+                auth_app_settings.permissions_boundary_policy_name,
+            )
+            iam.PermissionsBoundary.of(self).apply(permission_boundary_policy)
+
+            from infra.permission_boundary import PermissionBoundaryAspect
+
+            Aspects.of(self).add(PermissionBoundaryAspect(permission_boundary_policy))
 
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
-        auth_provider_client = self.add_programmatic_client(
-            "cognito-identity-pool-auth-provider",
-            name="Identity Pool Authentication Provider",
-        )
-        self.identitypool = self._create_identity_pool(
-            userpool=self.userpool,
-            auth_provider_client=auth_provider_client,
-        )
 
         self._group_precedence = 0
 
@@ -41,30 +50,40 @@ class AuthStack(Stack):
             export_name=f"{stack_name}-userpool-id",
             value=self.userpool.user_pool_id,
         )
-        CfnOutput(
-            self,
-            "identitypool_id",
-            export_name=f"{stack_name}-identitypool-id",
-            value=self.identitypool.identity_pool_id,
-        )
-        CfnOutput(
-            self,
-            "identitypool_arn",
-            export_name=f"{stack_name}-identitypool-arn",
-            value=self.identitypool.identity_pool_arn,
-        )
-        CfnOutput(
-            self,
-            "identitypool_client_id",
-            export_name=f"{stack_name}-client-id",
-            value=auth_provider_client.user_pool_client_id,
-        )
-        CfnOutput(
-            self,
-            "identitypool_data_managers_role_arn",
-            export_name=f"{stack_name}-data-managers-role-arn",
-            value=self.identitypool.authenticated_role.role_arn,
-        )
+
+        if auth_app_settings.cognito_groups:
+            auth_provider_client = self.add_programmatic_client(
+                "cognito-identity-pool-auth-provider",
+                name="Identity Pool Authentication Provider",
+            )
+            self.identitypool = self._create_identity_pool(
+                userpool=self.userpool,
+                auth_provider_client=auth_provider_client,
+            )
+            CfnOutput(
+                self,
+                "identitypool_id",
+                export_name=f"{stack_name}-identitypool-id",
+                value=self.identitypool.identity_pool_id,
+            )
+            CfnOutput(
+                self,
+                "identitypool_arn",
+                export_name=f"{stack_name}-identitypool-arn",
+                value=self.identitypool.identity_pool_arn,
+            )
+            CfnOutput(
+                self,
+                "identitypool_client_id",
+                export_name="client-id",
+                value=auth_provider_client.user_pool_client_id,
+            )
+            CfnOutput(
+                self,
+                "identitypool_data_managers_role_arn",
+                export_name=f"{stack_name}-data-managers-role-arn",
+                value=self.identitypool.authenticated_role.role_arn,
+            )
 
     def _create_userpool(self) -> cognito.UserPool:
         return cognito.UserPool(
@@ -81,9 +100,9 @@ class AuthStack(Stack):
         )
 
     def _create_identity_pool(
-        self,
-        userpool: cognito.UserPool,
-        auth_provider_client: cognito.UserPoolClient,
+            self,
+            userpool: cognito.UserPool,
+            auth_provider_client: cognito.UserPoolClient,
     ) -> cognito_id_pool.IdentityPool:
         userpool_provider = cognito_id_pool.UserPoolAuthenticationProvider(
             user_pool=userpool,
@@ -139,7 +158,7 @@ class AuthStack(Stack):
         domain = userpool.add_domain(
             "cognito-domain",
             cognito_domain=cognito.CognitoDomainOptions(
-                domain_prefix=f"{stack_name}-v1"
+                domain_prefix=f"{AuthConfig().project_prefix}-{stack_name}"
             ),
         )
 
@@ -153,8 +172,8 @@ class AuthStack(Stack):
         return domain
 
     def _get_client_secret(
-        self,
-        client: cognito.UserPoolClient,
+            self,
+            client: cognito.UserPoolClient,
     ) -> str:
         describe_cognito_user_pool_client = cr.AwsCustomResource(
             self,
@@ -182,9 +201,9 @@ class AuthStack(Stack):
         )
 
     def _create_secret(
-        self,
-        service_id: str,
-        secret_dict: Dict[Any, Any],
+            self,
+            service_id: str,
+            secret_dict: Dict[Any, Any],
     ):
         """
         Create a secret to represent service credentials.
@@ -219,10 +238,10 @@ class AuthStack(Stack):
         return secret
 
     def add_oidc_provider(
-        self,
-        provider_name: str,
-        oidc_domain: str,
-        oidc_thumbprint: str,
+            self,
+            provider_name: str,
+            oidc_domain: str,
+            oidc_thumbprint: str,
     ) -> iam.OpenIdConnectProvider:
         # OIDC providers are unique per account/url pair. If the provider already exists,
         # we can just reuse it. Otherwise, we need to create it.
@@ -258,9 +277,9 @@ class AuthStack(Stack):
             )
 
     def add_resource_server(
-        self,
-        resource_id: str,
-        supported_scopes: Dict[str, str],
+            self,
+            resource_id: str,
+            supported_scopes: Dict[str, str],
     ) -> Dict[str, cognito.OAuthScope]:
         """
         The resource server represents something that a client would like to be able to
@@ -291,9 +310,9 @@ class AuthStack(Stack):
         }
 
     def add_programmatic_client(
-        self,
-        service_id: str,
-        name: Optional[str] = None,
+            self,
+            service_id: str,
+            name: Optional[str] = None,
     ) -> cognito.UserPoolClient:
         client = self.userpool.add_client(
             service_id,
@@ -315,9 +334,9 @@ class AuthStack(Stack):
         return client
 
     def add_service_client(
-        self,
-        service_id: str,
-        scopes: Sequence[cognito.OAuthScope],
+            self,
+            service_id: str,
+            scopes: Sequence[cognito.OAuthScope],
     ) -> cognito.UserPoolClient:
         """
         Adds a client to the user pool that represents a service (ie not individual
@@ -359,10 +378,10 @@ class AuthStack(Stack):
         return self._group_precedence
 
     def add_cognito_group(
-        self,
-        group_name: str,
-        description: str,
-        bucket_permissions: Dict[str, BucketPermissions],
+            self,
+            group_name: str,
+            description: str,
+            bucket_permissions: Dict[str, BucketPermissions],
     ) -> cognito.CfnUserPoolGroup:
         role = iam.Role(
             self,
@@ -398,10 +417,10 @@ class AuthStack(Stack):
         )
 
     def add_cognito_group_with_existing_role(
-        self,
-        group_name: str,
-        description: str,
-        role_arn: str,
+            self,
+            group_name: str,
+            description: str,
+            role_arn: str,
     ) -> cognito.CfnUserPoolGroup:
         # Add identity pool to trust policy of authenticated users role
         self._grant_authenticated_role_principal(role_arn=role_arn)
