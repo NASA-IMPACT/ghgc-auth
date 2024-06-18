@@ -1,5 +1,8 @@
 # VEDA Auth System
 
+> [!IMPORTANT]
+> The US GHG Center has started using [veda-auth](https://github.com/NASA-IMPACT/veda-auth/) repository directly for its auth services. Hence, this forked version of the veda-auth repository is no longer maintained and so the repository is now archived.
+
 This codebase represents the Cognito-based authentication system used for the VEDA project.
 
 Note: This is for setting up the user pools and managing applications, it is _not_ for managing users. Managing users should be instead done via AWS
